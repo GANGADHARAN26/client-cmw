@@ -185,25 +185,12 @@ export default function Home() {
       setNavbar(true);
     }
   }, [isMobile]);
-  const renderBulletList = (text, maxItems = 3) => {
-    const lines = text.split('\n');
-    const displayLines = lines.slice(0, maxItems);
-    const hasMore = lines.length > maxItems;
-  
-    return (
-      <ul className="list-disc pl-5">
-        {displayLines.map((line, index) => (
-          <li key={index}>{line}</li>
-        ))}
-        {hasMore && <li className="italic text-gray-500">etc...</li>}
-      </ul>
-    );
-  };
+
   const [isOpen, setIsOpen] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+console.log(loading,error)
   useEffect(() => {
     const fetchJobs = async () => {
       setLoading(true);

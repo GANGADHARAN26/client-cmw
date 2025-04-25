@@ -1,7 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import axios from "axios";
-import { ChevronDown, Calendar, ArrowRight, ChevronsDown } from "lucide-react";
+import {  Calendar, ArrowRight, ChevronsDown } from "lucide-react";
 import { server } from "../../../db";
 
 export default function CreateJobModal({
