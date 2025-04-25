@@ -251,10 +251,10 @@ useEffect(() => {
         </nav>
       </div>
       {/* Filter section */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-6">
+      <div className="bg-white ">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between py-3 px-4 md:px-6 space-y-4 md:space-y-0">
           {/* Search Input */}
-          <div className="flex items-center flex-1 min-w-[200px]">
+          <div className="flex items-center w-full md:w-auto md:flex-1 min-w-[200px]">
             <Search className="w-5 h-5 text-gray-400" />
             <input
               type="text"
@@ -265,11 +265,11 @@ useEffect(() => {
             />
           </div>
 
-          {/* Divider */}
-          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+          {/* Divider - visible only on desktop */}
+          <div className="hidden md:block h-10  w-[1.5px] bg-gray-200 mx-4"></div>
 
           {/* Location Dropdown */}
-          <div className="flex items-center flex-1 min-w-[200px]">
+          <div className="flex items-center w-full md:w-auto md:flex-1 min-w-[200px]">
             <MapPin className="w-5 h-5 text-gray-400" />
             <select
               className="w-full outline-none ml-3 text-gray-600 bg-transparent appearance-none cursor-pointer"
@@ -285,11 +285,11 @@ useEffect(() => {
             </select>
           </div>
 
-          {/* Divider */}
-          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+          {/* Divider - visible only on desktop */}
+          <div className="hidden md:block h-10  w-[1.5px] bg-gray-200 mx-4"></div>
 
           {/* Job Type Dropdown */}
-          <div className="flex items-center flex-1 min-w-[200px]">
+          <div className="flex items-center w-full md:w-auto md:flex-1 min-w-[200px]">
             <UserSearch className="w-5 h-5 text-gray-400" />
             <select
               className="w-full outline-none ml-3 text-gray-600 bg-transparent appearance-none cursor-pointer"
@@ -305,14 +305,14 @@ useEffect(() => {
             </select>
           </div>
 
-          {/* Divider */}
-          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+          {/* Divider - visible only on desktop */}
+          <div className="hidden md:block h-10 w-[1.5px] bg-gray-200 mx-4"></div>
 
           {/* Salary Range */}
-          <div className="flex-1 min-w-[250px] px-4">
+          <div className="w-full md:w-auto md:flex-1 min-w-[250px] px-2 md:px-4">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-sm text-gray-600">Salary Per Month</span>
-              <span className="text-sm text-gray-600">
+              <span className="text-sm font-semibold">Salary Per Month</span>
+              <span className="text-sm font-semibold">
                 ₹{(salaryRange[0]/1000).toFixed(0)}k - ₹{(salaryRange[1]/1000).toFixed(0)}k
               </span>
             </div>
@@ -326,6 +326,20 @@ useEffect(() => {
                 step={10000}
                 valueLabelFormat={(value: number) => `₹${(value/1000).toFixed(0)}k`}
                 getAriaLabel={() => 'Salary range'}
+                className="font-black"
+                sx={{
+                  color: 'black', // Change slider color to black
+                  '& .MuiSlider-thumb': {
+                    borderColor: 'black',
+                    backgroundColor: 'black',
+                  },
+                  '& .MuiSlider-track': {
+                    backgroundColor: 'black',
+                  },
+                  '& .MuiSlider-rail': {
+                    backgroundColor: '#ccc', // optional: change rail color
+                  },
+                }}
               />
             </Box>
           </div>
