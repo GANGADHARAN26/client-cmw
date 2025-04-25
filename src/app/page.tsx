@@ -6,6 +6,7 @@ import { AlignJustify, MapPin, Search, UserSearch } from "lucide-react";
 import { useEffect, useState } from "react";
 import CreateJobModal from "./components/CreateJobModel";
 import { server } from "../../db";
+import { useIsMobile } from "./hooks/useIsMobile";
 export default function Home() {
   const [navbar, setNavbar] = useState(true);
   const isMobile = useIsMobile();
@@ -357,17 +358,4 @@ console.log(loading,error)
   );
 }
 
-export function useIsMobile(breakpoint = 768) {
-  const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkScreen = () => setIsMobile(window.innerWidth < breakpoint);
-
-    checkScreen(); // initial check
-    window.addEventListener("resize", checkScreen);
-
-    return () => window.removeEventListener("resize", checkScreen);
-  }, [breakpoint]);
-
-  return isMobile;
-}
