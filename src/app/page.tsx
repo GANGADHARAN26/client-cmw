@@ -167,7 +167,7 @@ useEffect(() => {
       if (!res.ok) throw new Error("Failed to fetch jobs");
       const data = await res.json();
       setJobs(data.jobs);
-        toast.success("Jobs loaded successfully!");
+        // toast.success("Jobs loaded successfully!");
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Something went wrong";
         setError(errorMessage);
