@@ -2,11 +2,12 @@
 import Image from "next/image";
 import logo from "../../public/cmwlogo.png";
 import Link from "next/link";
-import { AlignJustify, MapPin, Search, UserSearch } from "lucide-react";
-import { useEffect, useState } from "react";
+import { AlignJustify, MapPin, Search, UserSearch, Loader2 } from "lucide-react";
+import { useEffect, useState, Suspense } from "react";
 import CreateJobModal from "./components/CreateJobModel";
 import { server } from "../../db";
 import { useIsMobile } from "./hooks/useIsMobile";
+import { Toaster, toast } from "react-hot-toast";
 
 interface Job {
   _id: string;
@@ -22,6 +23,98 @@ interface Job {
   createdAt: string;
   __v: number;
 }
+
+// Utility function
+const getHoursAgo = (isoDateString: string) => {
+  const pastDate = new Date(isoDateString);
+  const now = new Date();
+
+  const diffInMs = now.getTime() - pastDate.getTime();
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+
+  if (diffInHours < 1) return "less than 1h";
+  if (diffInHours === 1) return "1h ago";
+  return `${diffInHours}h ago`;
+};
+
+// Loading component
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center min-h-[400px]">
+    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+  </div>
+);
+
+// Error component
+const ErrorMessage = ({ message }: { message: string }) => (
+  <div className="flex justify-center items-center min-h-[400px]">
+    <div className="text-red-500 text-center">
+      <p className="text-lg font-semibold">Error</p>
+      <p>{message}</p>
+    </div>
+  </div>
+);
+
+// JobList component
+const JobList = ({ jobs }: { jobs: Job[] }) => (
+  <div className="flex flex-wrap gap-10 p-9">
+    {jobs.map((job, index) => (
+      <div
+        key={index}
+        className="w-[316px] h-[360px] shadow-lg rounded-xl p-4"
+      >
+        <div className="flex justify-between">
+          <Image
+            src={logo}
+            alt="CMW"
+            width={70}
+            height={40}
+            className="p-2 shadow-2xl rounded-2xl"
+            style={{
+              background: "linear-gradient(to bottom, #fefefd, #f1f1f1)",
+            }}
+          />
+          <div>
+            <div className="flex justify-end pb-1 ">
+              <span className="bg-[#b0d9ff] rounded-xl flex justify-center items-center w-[75px] h-[33px] text-xs font-medium font-(family-name:Satoshi Variable)">
+                {getHoursAgo(job.createdAt)}
+              </span>
+            </div>
+            <div>
+              <p className="py-1 text-sm text-gray-500 font-bold ">
+                {job.companyName}
+              </p>
+            </div>
+          </div>
+        </div>
+        <h1 className="pt-5 font-medium font-(family-name:Satoshi Variable) text-xl">
+          {job.jobTitle}{" "}
+        </h1>
+
+        <div className="flex justify-between items-center py-2 text-sm text-gray-500 font-medium ">
+          <p className="flex">
+            <MapPin width={17} />
+            &nbsp; {job.location}{" "}
+          </p>
+          <p className="flex">
+            <Search width={17} />
+            &nbsp; {job.jobType}{" "}
+          </p>
+
+          <p></p>
+        </div>
+        <p className="py-1 text-sm text-gray-500 font-bold ">
+                Salary Range&nbsp; &nbsp;{" ₹"+job.salaryRange}
+              </p> 
+                <p className="text-sm text-gray-500 font-medium py-1 line-clamp-4 h-[88px]">
+                  {job.responsibilities}
+                </p>
+               <div className="flex items-end pt-3">
+               <button className="bg-[#00aaff] w-full rounded-md py-2 text-white">Apply Now</button>
+               </div>
+      </div>
+    ))}
+  </div>
+);
 
 export default function Home() {
   const [navbar, setNavbar] = useState(true);
@@ -55,18 +148,6 @@ export default function Home() {
     return matchesSearch && matchesLocation && matchesJobType && matchesSalary;
   });
 
-  function getHoursAgo(isoDateString: string) {
-    const pastDate = new Date(isoDateString);
-    const now = new Date();
-  
-    const diffInMs = now.getTime() - pastDate.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-  
-    if (diffInHours < 1) return "less than 1h";
-    if (diffInHours === 1) return "1h ago";
-    return `${diffInHours}h ago`;
-  }
-
   useEffect(() => {
     if (isMobile) {
       setNavbar(false);
@@ -84,12 +165,11 @@ export default function Home() {
         if (!res.ok) throw new Error("Failed to fetch jobs");
         const data = await res.json();
         setJobs(data.jobs);
+        toast.success("Jobs loaded successfully!");
       } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Something went wrong");
-        }
+        const errorMessage = err instanceof Error ? err.message : "Something went wrong";
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -100,6 +180,8 @@ export default function Home() {
 
   return (
     <div className="bg-[#fbfbff]">
+      <Toaster position="top-right" />
+      
       {/* navbar section */}
       <div>
         <nav className="flex md:justify-center my-4 font-medium mx-4 md:mx-0">
@@ -237,65 +319,16 @@ export default function Home() {
       {/* job Cards section */}
       
       <CreateJobModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      <div className="flex flex-wrap gap-10 p-9 ">
-        
-        {filteredJobs.map((job, index) => (
-          <div
-            key={index}
-            className="w-[316px] h-[360px] shadow-lg rounded-xl p-4"
-          >
-            <div className="flex justify-between">
-              <Image
-                src={logo}
-                alt="CMW"
-                width={70}
-                height={40}
-                className="p-2 shadow-2xl rounded-2xl"
-                style={{
-                  background: "linear-gradient(to bottom, #fefefd, #f1f1f1)",
-                }}
-              />
-              <div>
-                <div className="flex justify-end pb-1 ">
-                  <span className="bg-[#b0d9ff] rounded-xl flex justify-center items-center w-[75px] h-[33px] text-xs font-medium font-(family-name:Satoshi Variable)">
-                    {getHoursAgo(job.createdAt)}
-                  </span>
-                </div>
-                <div>
-                  <p className="py-1 text-sm text-gray-500 font-bold ">
-                    {job.companyName}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <h1 className="pt-5 font-medium font-(family-name:Satoshi Variable) text-xl">
-              {job.jobTitle}{" "}
-            </h1>
-
-            <div className="flex justify-between items-center py-2 text-sm text-gray-500 font-medium ">
-              <p className="flex">
-                <MapPin width={17} />
-                &nbsp; {job.location}{" "}
-              </p>
-              <p className="flex">
-                <Search width={17} />
-                &nbsp; {job.jobType}{" "}
-              </p>
-
-              <p></p>
-            </div>
-            <p className="py-1 text-sm text-gray-500 font-bold ">
-                    Salary Range&nbsp; &nbsp;{" ₹"+job.salaryRange}
-                  </p> 
-                  <p className="text-sm text-gray-500 font-medium py-1 line-clamp-4 h-[88px]">
-                    {job.responsibilities}
-                  </p>
-                 <div className="flex items-end pt-3">
-                 <button className="bg-[#00aaff] w-full rounded-md py-2 text-white">Apply Now</button>
-                 </div>
-          </div>
-        ))}
-      </div>
+      
+      <Suspense fallback={<LoadingSpinner />}>
+        {loading ? (
+          <LoadingSpinner />
+        ) : error ? (
+          <ErrorMessage message={error} />
+        ) : (
+          <JobList jobs={filteredJobs} />
+        )}
+      </Suspense>
     </div>
   );
 }
