@@ -1,18 +1,30 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment, useState, ChangeEvent } from "react";
 import axios from "axios";
 import {  Calendar, ArrowRight, ChevronsDown } from "lucide-react";
 import { server } from "../../../db";
 import { toast } from "react-hot-toast";
 
-export default function CreateJobModal({
-  isOpen,
-  onClose,
-}: {
+interface CreateJobModalProps {
   isOpen: boolean;
   onClose: () => void;
-}) {
-  const [formData, setFormData] = useState({
+}
+
+interface JobFormData {
+  jobTitle: string;
+  companyName: string;
+  location: string;
+  jobType: string;
+  salaryMin: string;
+  salaryMax: string;
+  jobDescription: string;
+  applicationDeadline: string;
+  responsibilities: string;
+  requirements: string;
+}
+
+export default function CreateJobModal({ isOpen, onClose }: CreateJobModalProps) {
+  const [formData, setFormData] = useState<JobFormData>({
     jobTitle: "",
     companyName: "",
     location: "",
@@ -26,17 +38,17 @@ export default function CreateJobModal({
   });
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  const countWords = (text: string) => {
+
+  const countWords = (text: string): number => {
     return text.trim().split(/\s+/).filter(Boolean).length;
   };
-  const handleSubmit = async () => {
+
+  const handleSubmit = async (): Promise<void> => {
     const minWords = 21;
 
     if (
@@ -67,7 +79,7 @@ export default function CreateJobModal({
         salaryRange,
         applicationDeadline: isoDeadline,
       });
-      
+      console.log(response);
       toast.success("Job created successfully!", {
         duration: 3000,
         position: "top-right",
@@ -88,7 +100,7 @@ export default function CreateJobModal({
     }
   };
 
-  const handleSaveDraft = () => {
+  const handleSaveDraft = (): void => {
     toast.success("Draft saved successfully!", {
       duration: 3000,
       position: "top-right",

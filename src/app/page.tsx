@@ -26,6 +26,13 @@ interface Job {
   __v: number;
 }
 
+interface FilterState {
+  searchQuery: string;
+  selectedLocation: string;
+  selectedJobType: string;
+  salaryRange: [number, number];
+}
+
 // Utility function
 const getHoursAgo = (isoDateString: string) => {
     const pastDate = new Date(isoDateString);
@@ -119,17 +126,17 @@ const JobList = ({ jobs }: { jobs: Job[] }) => (
 );
 
 export default function Home() {
-  const [navbar, setNavbar] = useState(true);
+  const [navbar, setNavbar] = useState<boolean>(true);
   const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>("");
   
   // Filter states
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedLocation, setSelectedLocation] = useState("");
-  const [selectedJobType, setSelectedJobType] = useState("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedLocation, setSelectedLocation] = useState<string>("");
+  const [selectedJobType, setSelectedJobType] = useState<string>("");
   const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 2000000]);
 
   // Get unique locations and job types for dropdowns
@@ -179,6 +186,10 @@ useEffect(() => {
 
   fetchJobs();
 }, []);
+
+  const handleSliderChange = (_event: Event, newValue: number | number[]) => {
+    setSalaryRange(newValue as [number, number]);
+  };
 
   return (
     <div className="bg-[#fbfbff]">
@@ -315,14 +326,12 @@ useEffect(() => {
             <Box>
               <Slider
                 value={salaryRange}
-                onChange={(event: Event, newValue: number | number[]) => {
-                  setSalaryRange(newValue as [number, number]);
-                }}
+                onChange={handleSliderChange}
                 valueLabelDisplay="auto"
                 min={0}
                 max={2000000}
                 step={10000}
-                valueLabelFormat={(value) => `₹${(value/1000).toFixed(0)}k`}
+                valueLabelFormat={(value: number) => `₹${(value/1000).toFixed(0)}k`}
                 getAriaLabel={() => 'Salary range'}
               />
             </Box>
