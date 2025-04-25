@@ -10,21 +10,18 @@ import { useIsMobile } from "./hooks/useIsMobile";
 export default function Home() {
   const [navbar, setNavbar] = useState(true);
   const isMobile = useIsMobile();
-  function getHoursAgo(isoDateString) {
+  function getHoursAgo(isoDateString: string) {
     const pastDate = new Date(isoDateString);
     const now = new Date();
-
-    const diffInMs = now - pastDate;
+  
+    const diffInMs = now.getTime() - pastDate.getTime();
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-    if (diffInHours < 1) {
-      return "less then 1h";
-    } else if (diffInHours === 1) {
-      return "1h Ago";
-    } else {
-      return `${diffInHours}h Ago`;
-    }
+  
+    if (diffInHours < 1) return "less than 1h";
+    if (diffInHours === 1) return "1h ago";
+    return `${diffInHours}h ago`;
   }
+  
 
   // const jobs = [
   //   {
@@ -192,24 +189,29 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 console.log(loading,error)
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(`${server}/api/jobs`);
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const data = await res.json();
-        setJobs(data.jobs);
-      } catch (err) {
-        setError(err.message || "Something went wrong");
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchJobs = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${server}/api/jobs`);
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      const data = await res.json();
+      setJobs(data.jobs);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
       }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchJobs();
-  }, []);
+  fetchJobs();
+}, []);
+
   return (
     <div className="bg-[#fbfbff]">
       {/* navbar section */}
