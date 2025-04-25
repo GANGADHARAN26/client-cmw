@@ -26,13 +26,6 @@ interface Job {
   __v: number;
 }
 
-interface FilterState {
-  searchQuery: string;
-  selectedLocation: string;
-  selectedJobType: string;
-  salaryRange: [number, number];
-}
-
 // Utility function
 const getHoursAgo = (isoDateString: string) => {
     const pastDate = new Date(isoDateString);
