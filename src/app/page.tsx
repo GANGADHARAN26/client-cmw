@@ -7,9 +7,54 @@ import { useEffect, useState } from "react";
 import CreateJobModal from "./components/CreateJobModel";
 import { server } from "../../db";
 import { useIsMobile } from "./hooks/useIsMobile";
+
+interface Job {
+  _id: string;
+  jobTitle: string;
+  companyName: string;
+  location: string;
+  jobType: string;
+  salaryRange: string;
+  jobDescription: string;
+  requirements: string;
+  responsibilities: string;
+  applicationDeadline: string;
+  createdAt: string;
+  __v: number;
+}
+
 export default function Home() {
   const [navbar, setNavbar] = useState(true);
   const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(false);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState("");
+  const [selectedJobType, setSelectedJobType] = useState("");
+  const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 2000000]);
+
+  // Get unique locations and job types for dropdowns
+  const locations = Array.from(new Set(jobs.map(job => job.location)));
+  const jobTypes = Array.from(new Set(jobs.map(job => job.jobType)));
+
+  // Filter jobs based on search criteria
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         job.companyName.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesLocation = !selectedLocation || job.location === selectedLocation;
+    const matchesJobType = !selectedJobType || job.jobType === selectedJobType;
+    
+    // Parse salary range
+    const [minSalary, maxSalary] = job.salaryRange.split('-').map(Number);
+    const matchesSalary = minSalary >= salaryRange[0] && maxSalary <= salaryRange[1];
+
+    return matchesSearch && matchesLocation && matchesJobType && matchesSalary;
+  });
+
   function getHoursAgo(isoDateString: string) {
     const pastDate = new Date(isoDateString);
     const now = new Date();
@@ -21,196 +66,37 @@ export default function Home() {
     if (diffInHours === 1) return "1h ago";
     return `${diffInHours}h ago`;
   }
-  
-
-  // const jobs = [
-  //   {
-  //     jobTitle: "Data Scientist",
-  //     companyName: "Data Analytics Pro",
-  //     location: "Boston, MA",
-  //     jobType: "Full-time",
-  //     salaryRange: "110000-140000",
-  //     jobDescription:
-  //       "We're looking for a Data Scientist to help us extract insights from complex datasets and build predictive models.",
-  //     requirements:
-  //       "Master's degree in Data Science or related field\n3+ years of experience in data analysis\nProficiency in Python and R\nExperience with machine learning algorithms\nStrong statistical knowledge",
-  //     responsibilities:
-  //       "Develop and implement machine \nAnalyze large datasets\nCreate data visualizations\nCollaborate with business teams\nPresent findings to stakeholders",
-  //     applicationDeadline: "2025-06-30T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Machine Learning Engineer",
-  //     companyName: "AI Solutions Inc.",
-  //     location: "San Francisco, CA",
-  //     jobType: "Full-time",
-  //     salaryRange: "120000-150000",
-  //     jobDescription:
-  //       "Join our AI team to build intelligent systems and predictive algorithms that solve real-world problems.",
-  //     requirements:
-  //       "Bachelor's degree in Computer Science\nExperience with TensorFlow and PyTorch\nSolid Python programming skills\nUnderstanding of deep learning architectures",
-  //     responsibilities:
-  //       "Design ML pipelines\nTrain and deploy models\nEvaluate performance metrics\nWork with product teams\nMaintain model accuracy",
-  //     applicationDeadline: "2025-07-15T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Business Intelligence Analyst",
-  //     companyName: "Insight Corp",
-  //     location: "New York, NY",
-  //     jobType: "Contract",
-  //     salaryRange: "90000-115000",
-  //     jobDescription:
-  //       "Seeking a BI Analyst to deliver actionable insights using data visualization tools and dashboards.",
-  //     requirements:
-  //       "Proficiency in SQL\nExperience with Tableau or Power BI\nStrong communication skills\nBachelor’s in Analytics or similar",
-  //     responsibilities:
-  //       "Build dashboards\nWork with stakeholders\nPrepare reports\nOptimize database queries\nIdentify business trends",
-  //     applicationDeadline: "2025-08-10T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Data Analyst",
-  //     companyName: "FinTech Dynamics",
-  //     location: "Austin, TX",
-  //     jobType: "Part-time",
-  //     salaryRange: "65000-85000",
-  //     jobDescription:
-  //       "We are hiring a Data Analyst to track performance and assist in decision-making processes with data insights.",
-  //     requirements:
-  //       "Experience with Excel and SQL\nUnderstanding of business KPIs\n1+ years in analytics\nBachelor’s degree",
-  //     responsibilities:
-  //       "Analyze performance metrics\nReport generation\nTrend analysis\nSupport decision making\nData cleaning",
-  //     applicationDeadline: "2025-07-01T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "AI Researcher",
-  //     companyName: "Quantum AI Lab",
-  //     location: "Seattle, WA",
-  //     jobType: "Remote",
-  //     salaryRange: "140000-170000",
-  //     jobDescription:
-  //       "Join our research lab to explore and publish breakthroughs in artificial intelligence and machine learning.",
-  //     requirements:
-  //       "Ph.D. in AI/ML or related field\nPublications in top-tier conferences\nStrong coding skills\nResearch experience",
-  //     responsibilities:
-  //       "Research and publish papers\nPrototype algorithms\nCollaborate with academics\nConduct experiments",
-  //     applicationDeadline: "2025-10-01T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Data Engineer",
-  //     companyName: "DataStack",
-  //     location: "Chicago, IL",
-  //     jobType: "Full-time",
-  //     salaryRange: "105000-130000",
-  //     jobDescription:
-  //       "Build and maintain scalable data pipelines for various product and analytics teams.",
-  //     requirements:
-  //       "Experience with ETL tools\nProficiency in Python or Scala\nFamiliarity with AWS/GCP\nSQL expertise",
-  //     responsibilities:
-  //       "Design data pipelines\nEnsure data quality\nMonitor system health\nDocument architecture",
-  //     applicationDeadline: "2025-09-20T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "NLP Engineer",
-  //     companyName: "VoiceBot AI",
-  //     location: "Remote",
-  //     jobType: "Contract",
-  //     salaryRange: "95000-125000",
-  //     jobDescription:
-  //       "We're looking for an NLP Engineer to enhance our chatbot and voice assistant capabilities.",
-  //     requirements:
-  //       "Experience with NLP libraries (spaCy, NLTK)\nKnowledge of transformer models\nGood Python skills\nUnderstanding of conversational AI",
-  //     responsibilities:
-  //       "Train NLP models\nImprove text understanding\nAnalyze user input\nEnhance intent detection",
-  //     applicationDeadline: "2025-08-31T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Data Architect",
-  //     companyName: "Cloudify Solutions",
-  //     location: "Denver, CO",
-  //     jobType: "Full-time",
-  //     salaryRange: "130000-160000",
-  //     jobDescription:
-  //       "Design modern data platforms and architecture for our enterprise-grade clients.",
-  //     requirements:
-  //       "Strong knowledge of cloud platforms\nData modeling experience\nETL design skills\nArchitect-level certifications",
-  //     responsibilities:
-  //       "Architect data lakes\nDefine data strategy\nEnsure governance\nWork with engineering teams",
-  //     applicationDeadline: "2025-07-25T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Junior Data Analyst",
-  //     companyName: "StartUpBoost",
-  //     location: "Remote",
-  //     jobType: "Internship",
-  //     salaryRange: "20000-30000",
-  //     jobDescription:
-  //       "Great opportunity for a fresher to explore the world of data analysis in a startup environment.",
-  //     requirements:
-  //       "Currently pursuing or completed Bachelor’s\nGood with Excel & SQL\nCuriosity to learn\nProblem-solving skills",
-  //     responsibilities:
-  //       "Assist senior analysts\nRun data queries\nClean datasets\nMake visualizations",
-  //     applicationDeadline: "2025-06-20T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  //   {
-  //     jobTitle: "Statistical Analyst",
-  //     companyName: "HealthData Pros",
-  //     location: "Atlanta, GA",
-  //     jobType: "Full-time",
-  //     salaryRange: "95000-110000",
-  //     jobDescription:
-  //       "Looking for a Statistical Analyst to help with epidemiological studies and data research.",
-  //     requirements:
-  //       "Strong background in statistics\nProficiency with R and SAS\nExperience in health domain preferred",
-  //     responsibilities:
-  //       "Run statistical models\nInterpret data findings\nCollaborate with researchers\nPublish reports",
-  //     applicationDeadline: "2025-09-10T23:59:59Z",
-  //     createdAt: "2025-04-24T07:15:51.697Z",
-  //   },
-  // ];
 
   useEffect(() => {
     if (isMobile) {
-      setNavbar(false); // auto-close navbar if screen is larger than md
+      setNavbar(false);
     } else {
       setNavbar(true);
     }
   }, [isMobile]);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-console.log(loading,error)
-useEffect(() => {
-  const fetchJobs = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch(`${server}/api/jobs`);
-      if (!res.ok) throw new Error("Failed to fetch jobs");
-      const data = await res.json();
-      setJobs(data.jobs);
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong");
+  useEffect(() => {
+    const fetchJobs = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const res = await fetch(`${server}/api/jobs`);
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const data = await res.json();
+        setJobs(data.jobs);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Something went wrong");
+        }
+      } finally {
+        setLoading(false);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  fetchJobs();
-}, []);
+    fetchJobs();
+  }, []);
 
   return (
     <div className="bg-[#fbfbff]">
@@ -277,21 +163,75 @@ useEffect(() => {
         </nav>
       </div>
       {/* filter sectopm */}
-      <div className="flex justify-between items-center py-5 px-45 shadow-lg ">
-        <div className="flex justify-center items-center border-r-2 border-gray-300 pr-3">
-          <Search className="text-gray-400" /> &nbsp;&nbsp;
-          <input type="text" className="outline-none" placeholder="Search by Job Title, Role " />
+      <div className="flex flex-col md:flex-row justify-between items-center py-5 px-4 md:px-8 shadow-lg gap-4">
+        <div className="flex items-center border-r-2 border-gray-300 pr-3 w-full md:w-auto">
+          <Search className="text-gray-400" />
+          <input
+            type="text"
+            className="outline-none ml-2 w-full"
+            placeholder="Search by Job Title, Role"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
-        <div className="flex justify-center items-center border-r-2 pr-3 border-gray-300">
-          <MapPin className="text-gray-400" /> &nbsp;&nbsp;
-          <input type="text" placeholder="Preferref locations" />
+        
+        <div className="flex items-center border-r-2 pr-3 border-gray-300 w-full md:w-auto">
+          <MapPin className="text-gray-400" />
+          <select
+            className="outline-none ml-2 w-full"
+            value={selectedLocation}
+            onChange={(e) => setSelectedLocation(e.target.value)}
+          >
+            <option value="">All Locations</option>
+            {locations.map((location) => (
+              <option key={location} value={location}>
+                {location}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex justify-center items-center border-r-2 pr-3 border-gray-300">
-          <UserSearch className="text-gray-400" /> &nbsp;&nbsp;
-          <input type="text" placeholder="Job type" />
+        
+        <div className="flex items-center border-r-2 pr-3 border-gray-300 w-full md:w-auto">
+          <UserSearch className="text-gray-400" />
+          <select
+            className="outline-none ml-2 w-full"
+            value={selectedJobType}
+            onChange={(e) => setSelectedJobType(e.target.value)}
+          >
+            <option value="">All Job Types</option>
+            {jobTypes.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
         </div>
-        <div className="flex justify-center items-center ">
-          salary pern month
+        
+        <div className="flex flex-col items-center w-full md:w-auto">
+          <label className="text-sm text-gray-600 mb-1">Salary Range (₹)</label>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min="0"
+              max="2000000"
+              step="10000"
+              value={salaryRange[0]}
+              onChange={(e) => setSalaryRange([Number(e.target.value), salaryRange[1]])}
+              className="w-32"
+            />
+            <span className="text-sm">{salaryRange[0].toLocaleString()}</span>
+            <span>-</span>
+            <input
+              type="range"
+              min="0"
+              max="2000000"
+              step="10000"
+              value={salaryRange[1]}
+              onChange={(e) => setSalaryRange([salaryRange[0], Number(e.target.value)])}
+              className="w-32"
+            />
+            <span className="text-sm">{salaryRange[1].toLocaleString()}</span>
+          </div>
         </div>
       </div>
       {/* job Cards section */}
@@ -299,7 +239,7 @@ useEffect(() => {
       <CreateJobModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
       <div className="flex flex-wrap gap-10 p-9 ">
         
-        {jobs.map((job, index) => (
+        {filteredJobs.map((job, index) => (
           <div
             key={index}
             className="w-[316px] h-[360px] shadow-lg rounded-xl p-4"
