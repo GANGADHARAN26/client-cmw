@@ -8,6 +8,8 @@ import CreateJobModal from "./components/CreateJobModel";
 import { server } from "../../db";
 import { useIsMobile } from "./hooks/useIsMobile";
 import { Toaster, toast } from "react-hot-toast";
+import Box from '@mui/material/Box';
+import Slider from '@mui/material/Slider';
 
 interface Job {
   _id: string;
@@ -26,15 +28,15 @@ interface Job {
 
 // Utility function
 const getHoursAgo = (isoDateString: string) => {
-  const pastDate = new Date(isoDateString);
-  const now = new Date();
-
-  const diffInMs = now.getTime() - pastDate.getTime();
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-
-  if (diffInHours < 1) return "less than 1h";
-  if (diffInHours === 1) return "1h ago";
-  return `${diffInHours}h ago`;
+    const pastDate = new Date(isoDateString);
+    const now = new Date();
+  
+    const diffInMs = now.getTime() - pastDate.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+  
+    if (diffInHours < 1) return "less than 1h";
+    if (diffInHours === 1) return "1h ago";
+    return `${diffInHours}h ago`;
 };
 
 // Loading component
@@ -156,27 +158,27 @@ export default function Home() {
     }
   }, [isMobile]);
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const res = await fetch(`${server}/api/jobs`);
-        if (!res.ok) throw new Error("Failed to fetch jobs");
-        const data = await res.json();
-        setJobs(data.jobs);
+useEffect(() => {
+  const fetchJobs = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch(`${server}/api/jobs`);
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      const data = await res.json();
+      setJobs(data.jobs);
         toast.success("Jobs loaded successfully!");
-      } catch (err) {
+    } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Something went wrong";
         setError(errorMessage);
         toast.error(errorMessage);
-      } finally {
-        setLoading(false);
-      }
-    };
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchJobs();
-  }, []);
+  fetchJobs();
+}, []);
 
   return (
     <div className="bg-[#fbfbff]">
@@ -244,75 +246,86 @@ export default function Home() {
           </span>
         </nav>
       </div>
-      {/* filter sectopm */}
-      <div className="flex flex-col md:flex-row justify-between items-center py-5 px-4 md:px-8 shadow-lg gap-4">
-        <div className="flex items-center border-r-2 border-gray-300 pr-3 w-full md:w-auto">
-          <Search className="text-gray-400" />
-          <input
-            type="text"
-            className="outline-none ml-2 w-full"
-            placeholder="Search by Job Title, Role"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <div className="flex items-center border-r-2 pr-3 border-gray-300 w-full md:w-auto">
-          <MapPin className="text-gray-400" />
-          <select
-            className="outline-none ml-2 w-full"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-          >
-            <option value="">All Locations</option>
-            {locations.map((location) => (
-              <option key={location} value={location}>
-                {location}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="flex items-center border-r-2 pr-3 border-gray-300 w-full md:w-auto">
-          <UserSearch className="text-gray-400" />
-          <select
-            className="outline-none ml-2 w-full"
-            value={selectedJobType}
-            onChange={(e) => setSelectedJobType(e.target.value)}
-          >
-            <option value="">All Job Types</option>
-            {jobTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-        
-        <div className="flex flex-col items-center w-full md:w-auto">
-          <label className="text-sm text-gray-600 mb-1">Salary Range (₹)</label>
-          <div className="flex items-center gap-2">
+      {/* Filter section */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto flex items-center justify-between py-3 px-6">
+          {/* Search Input */}
+          <div className="flex items-center flex-1 min-w-[200px]">
+            <Search className="w-5 h-5 text-gray-400" />
             <input
-              type="range"
-              min="0"
-              max="2000000"
-              step="10000"
-              value={salaryRange[0]}
-              onChange={(e) => setSalaryRange([Number(e.target.value), salaryRange[1]])}
-              className="w-32"
+              type="text"
+              className="w-full outline-none ml-3 text-gray-600 placeholder:text-gray-400"
+              placeholder="Search By Job Title, Role"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <span className="text-sm">{salaryRange[0].toLocaleString()}</span>
-            <span>-</span>
-            <input
-              type="range"
-              min="0"
-              max="2000000"
-              step="10000"
-              value={salaryRange[1]}
-              onChange={(e) => setSalaryRange([salaryRange[0], Number(e.target.value)])}
-              className="w-32"
-            />
-            <span className="text-sm">{salaryRange[1].toLocaleString()}</span>
+          </div>
+
+          {/* Divider */}
+          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+
+          {/* Location Dropdown */}
+          <div className="flex items-center flex-1 min-w-[200px]">
+            <MapPin className="w-5 h-5 text-gray-400" />
+            <select
+              className="w-full outline-none ml-3 text-gray-600 bg-transparent appearance-none cursor-pointer"
+              value={selectedLocation}
+              onChange={(e) => setSelectedLocation(e.target.value)}
+            >
+              <option value="">Preferred Location</option>
+              {locations.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Divider */}
+          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+
+          {/* Job Type Dropdown */}
+          <div className="flex items-center flex-1 min-w-[200px]">
+            <UserSearch className="w-5 h-5 text-gray-400" />
+            <select
+              className="w-full outline-none ml-3 text-gray-600 bg-transparent appearance-none cursor-pointer"
+              value={selectedJobType}
+              onChange={(e) => setSelectedJobType(e.target.value)}
+            >
+              <option value="">Job Type</option>
+              {jobTypes.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Divider */}
+          <div className="h-8 w-px bg-gray-200 mx-4"></div>
+
+          {/* Salary Range */}
+          <div className="flex-1 min-w-[250px] px-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm text-gray-600">Salary Per Month</span>
+              <span className="text-sm text-gray-600">
+                ₹{(salaryRange[0]/1000).toFixed(0)}k - ₹{(salaryRange[1]/1000).toFixed(0)}k
+              </span>
+            </div>
+            <Box>
+              <Slider
+                value={salaryRange}
+                onChange={(event: Event, newValue: number | number[]) => {
+                  setSalaryRange(newValue as [number, number]);
+                }}
+                valueLabelDisplay="auto"
+                min={0}
+                max={2000000}
+                step={10000}
+                valueLabelFormat={(value) => `₹${(value/1000).toFixed(0)}k`}
+                getAriaLabel={() => 'Salary range'}
+              />
+            </Box>
           </div>
         </div>
       </div>
