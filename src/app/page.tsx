@@ -26,7 +26,6 @@ interface Job {
   __v: number;
 }
 
-// Utility function
 const getHoursAgo = (isoDateString: string) => {
     const pastDate = new Date(isoDateString);
     const now = new Date();
@@ -39,14 +38,12 @@ const getHoursAgo = (isoDateString: string) => {
     return `${diffInHours}h ago`;
 };
 
-// Loading component
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center min-h-[400px]">
     <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
   </div>
 );
 
-// Error component
 const ErrorMessage = ({ message }: { message: string }) => (
   <div className="flex justify-center items-center min-h-[400px]">
     <div className="text-red-500 text-center">
@@ -56,7 +53,6 @@ const ErrorMessage = ({ message }: { message: string }) => (
   </div>
 );
 
-// JobList component
 const JobList = ({ jobs }: { jobs: Job[] }) => (
   <div className="flex flex-wrap gap-10 p-9">
     {jobs.map((job, index) => (
@@ -126,24 +122,20 @@ export default function Home() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
   
-  // Filter states
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedLocation, setSelectedLocation] = useState<string>("");
   const [selectedJobType, setSelectedJobType] = useState<string>("");
   const [salaryRange, setSalaryRange] = useState<[number, number]>([0, 2000000]);
 
-  // Get unique locations and job types for dropdowns
   const locations = Array.from(new Set(jobs.map(job => job.location)));
   const jobTypes = Array.from(new Set(jobs.map(job => job.jobType)));
 
-  // Filter jobs based on search criteria
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          job.companyName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesLocation = !selectedLocation || job.location === selectedLocation;
     const matchesJobType = !selectedJobType || job.jobType === selectedJobType;
     
-    // Parse salary range
     const [minSalary, maxSalary] = job.salaryRange.split('-').map(Number);
     const matchesSalary = minSalary >= salaryRange[0] && maxSalary <= salaryRange[1];
 
@@ -167,7 +159,6 @@ useEffect(() => {
       if (!res.ok) throw new Error("Failed to fetch jobs");
       const data = await res.json();
       setJobs(data.jobs);
-        // toast.success("Jobs loaded successfully!");
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Something went wrong";
         setError(errorMessage);
