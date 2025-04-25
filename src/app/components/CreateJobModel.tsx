@@ -3,6 +3,7 @@ import { Fragment, useState } from "react";
 import axios from "axios";
 import {  Calendar, ArrowRight, ChevronsDown } from "lucide-react";
 import { server } from "../../../db";
+import { toast } from "react-hot-toast";
 
 export default function CreateJobModal({
   isOpen,
@@ -43,8 +44,12 @@ export default function CreateJobModal({
       countWords(formData.responsibilities) < minWords ||
       countWords(formData.requirements) < minWords
     ) {
-      alert(
-        "Please provide at least 21 words in Job Description, Responsibilities, and Requirements."
+      toast.error(
+        "Please provide at least 21 words in Job Description, Responsibilities, and Requirements.",
+        {
+          duration: 4000,
+          position: "top-right",
+        }
       );
       return;
     }
@@ -57,15 +62,38 @@ export default function CreateJobModal({
     ).toISOString();
 
     try {
-      await axios.post(`${server}/api/jobs`, {
+      const response = await axios.post(`${server}/api/jobs`, {
         ...formData,
         salaryRange,
         applicationDeadline: isoDeadline,
       });
+      
+      toast.success("Job created successfully!", {
+        duration: 3000,
+        position: "top-right",
+      });
+      
       onClose();
     } catch (error) {
       console.error("Error creating job:", error);
+      toast.error(
+        error instanceof Error 
+          ? error.message 
+          : "Failed to create job. Please try again.",
+        {
+          duration: 4000,
+          position: "top-right",
+        }
+      );
     }
+  };
+
+  const handleSaveDraft = () => {
+    toast.success("Draft saved successfully!", {
+      duration: 3000,
+      position: "top-right",
+    });
+    onClose();
   };
 
   return (
@@ -293,7 +321,7 @@ export default function CreateJobModal({
                 <div className="mt-6 flex justify-between">
                   <button
                     className="px-4 py-2 border-2 border-gray-300 rounded-md flex items-center gap-2 text-sm font-medium"
-                    onClick={onClose}
+                    onClick={handleSaveDraft}
                   >
                     Save Draft
                     <ChevronsDown className="w-4 h-4" />
