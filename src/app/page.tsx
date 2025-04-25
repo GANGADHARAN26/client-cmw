@@ -176,7 +176,7 @@ useEffect(() => {
   };
 
   return (
-    <div className="bg-[#fbfbff]">
+    <div className=" h-full">
       <Toaster position="top-right" />
       
       {/* navbar section */}
@@ -242,14 +242,14 @@ useEffect(() => {
         </nav>
       </div>
       {/* Filter section */}
-      <div className="bg-white ">
+      <div className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between py-3 px-4 md:px-6 space-y-4 md:space-y-0">
           {/* Search Input */}
           <div className="flex items-center w-full md:w-auto md:flex-1 min-w-[200px]">
             <Search className="w-5 h-5 text-gray-400" />
             <input
               type="text"
-              className="w-full outline-none ml-3 text-gray-600 placeholder:text-gray-400"
+              className="w-full outline-none ml-3 text-gray-600 placeholder:text-gray-400 placeholder:font-medium"
               placeholder="Search By Job Title, Role"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
